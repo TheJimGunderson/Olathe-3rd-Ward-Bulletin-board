@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ward Bulletin Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #101B28;
+    --panel: #172436;
+    --panel-alt: #1D2C41;
+    --cream: #F1E9D8;
+    --muted: #93A6BC;
+    --gold: #C9A24B;
+    --burgundy: #A5453F;
+    --sage: #6F8F72;
+    --slate: #5C7A9C;
+    --hair: rgba(241,233,216,0.14);
+    --radius: 3px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{
+    font-size: clamp(13px, 1.1vw, 22px);
+  }
+
+  body{
+    margin:0;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    background: var(--bg);
+    color: var(--cream);
+    font-family:'Work Sans', sans-serif;
+  }
+
+  h1,h2,h3{
+    font-family:'Lora', serif;
+    margin:0;
+  }
+
+  .board{
+    height:100vh;
+    width:100vw;
+    display:grid;
+    grid-template-columns: 1.55fr 2.15fr 1.5fr;
+    grid-template-rows: auto 1fr 1fr;
+    grid-template-areas:
+      "head head head"
+      "sac  ann  phone"
+      "feed feed miss";
+    gap: 1px;
+    background: var(--hair);
+  }
+
+  .board > *{
+    background: var(--panel);
+  }
+
+  /* ---------- Header ---------- */
+  .masthead{
+    grid-area: head;
+    display:flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 1rem 1.6rem;
+    border-bottom: 2px solid var(--gold);
+    background: var(--panel-alt);
+  }
+  .masthead .ward-name{
+    font-size: 1.9rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .masthead .ward-name span{
+    display:block;
+    font-family:'Work Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 500;
+    margin-top: 0.15rem;
+  }
+  .masthead .clock{
+    text-align:right;
+    font-variant-numeric: tabular-nums;
+  }
+  .masthead .clock .time{
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--gold);
+  }
+  .masthead .clock .date{
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  /* ---------- Shared panel chrome ---------- */
+  .panel{
+    padding: 1.1rem 1.4rem;
+    overflow: hidden;
+    display:flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .panel h2{
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--gold);
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--hair);
+    margin-bottom: 0.7rem;
+  }
+  .panel h2 small{
+    display:block;
+    font-family:'Work Sans', sans-serif;
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-weight: 500;
+    margin-top: 0.2rem;
+  }
+
+  /* ---------- Sacrament Meeting (dot-leader program style) ---------- */
+  .sacrament{ grid-area: sac; }
+  .toc-row{
+    display:flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.2rem 0;
+  }
+  .toc-row .label{
+    font-family:'Lora', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--cream);
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+  .toc-row .leader{
+    flex: 1 1 auto;
+    border-bottom: 2px dotted var(--hair);
+    margin-bottom: 5px;
+    min-width: 0.5rem;
+  }
+  .toc-row .value{
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-align: right;
+    max-width: 46%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .toc-row.section-break{
+    margin-top: 0.4rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--hair);
+  }
+  .sac-qr{
+    margin-top: auto;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--hair);
+    display:flex;
+    align-items:center;
+    gap: 0.8rem;
+  }
+  .sac-qr img{
+    width: clamp(60px, 6vw, 100px);
+    height: clamp(60px, 6vw, 100px);
+    background:#fff;
+    padding: 5px;
+    flex-shrink: 0;
+  }
+  .sac-qr span{
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+
+  /* ---------- Announcements ---------- */
+  .announcements{ grid-area: ann; }
+  .ann-grid{
+    flex:1;
+    min-height:0;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0.9rem;
+  }
+  .ann-card{
+    min-height:0;
+    padding: 0.6rem 0.8rem;
+    background: var(--panel-alt);
+    border-left: 4px solid var(--slate);
+    display:flex;
+    flex-direction: column;
+    overflow:hidden;
+  }
+  .ann-card.urgent{ border-color: var(--burgundy); }
+  .ann-card.upcoming{ border-color: var(--gold); }
+  .ann-card.future{ border-color: var(--slate); }
+  .ann-card.recurring{ border-color: var(--sage); }
+  .ann-card h3{
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+    font-family: 'Work Sans', sans-serif;
+  }
+  .ann-card.urgent h3{ color: var(--burgundy); }
+  .ann-card.upcoming h3{ color: var(--gold); }
+  .ann-card.recurring h3{ color: var(--sage); }
+  .ann-list{
+    overflow: hidden;
+    flex:1;
+  }
+  .ann-item{
+    margin-bottom: 0.45rem;
+  }
+  .ann-item .t{
+    font-weight: 600;
+    font-size: 0.82rem;
+    line-height: 1.25;
+  }
+  .ann-item .d{
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.3;
+  }
+  .ann-item .link-row{
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    margin-top:0.3rem;
+  }
+  .ann-item .link-row a{
+    color: var(--gold);
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-decoration: underline;
+    word-break: break-all;
+  }
+  .ann-item .link-row img{
+    width: 40px;
+    height: 40px;
+    background:#fff;
+    padding: 2px;
+    flex-shrink:0;
+  }
+
+  /* ---------- Feed the Missionaries ---------- */
+  .feed-missionaries{ grid-area: feed; }
+  .feed-body{
+    flex:1;
+    min-height:0;
+    display:grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.1rem;
+    align-items: stretch;
+  }
+  .qr-block{
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    gap:0.4rem;
+    padding: 0.5rem 0.9rem;
+    background: var(--panel-alt);
+  }
+  .qr-block img{
+    width: clamp(70px, 8vw, 130px);
+    height: clamp(70px, 8vw, 130px);
+    background:#fff;
+    padding: 6px;
+  }
+  .qr-block span{
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align:center;
+    max-width: 9rem;
+  }
+  .calendar-wrap{
+    position: relative;
+    min-height: 0;
+    background: var(--panel-alt);
+  }
+  .calendar-wrap iframe{
+    width:100%;
+    height:100%;
+    border:0;
+    display:block;
+  }
+  .calendar-placeholder{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding: 1rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* ---------- Phone numbers ---------- */
+  .phone-numbers{ grid-area: phone; }
+  .phone-list{
+    flex:1;
+    min-height:0;
+    overflow:hidden;
+    column-count: 1;
+  }
+  .phone-entry{
+    padding: 0.32rem 0;
+    border-bottom: 1px solid var(--hair);
+  }
+  .phone-entry .role{
+    font-size: 0.68rem;
+    color: var(--gold);
+    text-transform: none;
+    font-weight: 600;
+  }
+  .phone-entry .name{
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .phone-entry .numbers{
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .phone-entry .numbers .tag{
+    color: var(--muted);
+    font-size: 0.68rem;
+  }
+
+  /* ---------- Missionaries serving ---------- */
+  .missionaries{ grid-area: miss; }
+  .miss-list{
+    flex:1;
+    min-height:0;
+    overflow:hidden;
+    display:flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .miss-card{
+    padding: 0.5rem 0.7rem;
+    background: var(--panel-alt);
+    border-left: 4px solid var(--gold);
+  }
+  .miss-card .name{
+    font-family:'Lora', serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    margin-bottom: 0.15rem;
+  }
+  .miss-card .line{
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.3;
+  }
+
+  @media (max-width: 900px){
+    body{ overflow:auto; height:auto; }
+    .board{
+      height:auto;
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "head"
+        "sac"
+        "ann"
+        "feed"
+        "phone"
+        "miss";
+    }
+    .ann-grid{ grid-template-columns: 1fr; grid-template-rows: none; }
+    .feed-body{ grid-template-columns: 1fr; }
+    .phone-list{ column-count: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="board">
+
+  <header class="masthead">
+    <div class="ward-name" id="wardName"></div>
+    <div class="clock">
+      <div class="time" id="clockTime"></div>
+      <div class="date" id="clockDate"></div>
+    </div>
+  </header>
+
+  <section class="sacrament panel">
+    <h2>Sacrament Meeting<small>Order of service — update weekly</small></h2>
+    <div id="sacramentBody"></div>
+  </section>
+
+  <section class="announcements panel">
+    <h2>Announcements</h2>
+    <div class="ann-grid" id="announcementsBody"></div>
+  </section>
+
+  <section class="feed-missionaries panel">
+    <h2>Feed the Missionaries</h2>
+    <div class="feed-body">
+      <div class="qr-block">
+        <img id="qrImage" alt="QR code to sign up to feed the missionaries">
+        <span>Scan to sign up for a meal</span>
+      </div>
+      <div class="calendar-wrap" id="calendarWrap"></div>
+    </div>
+  </section>
+
+  <section class="phone-numbers panel">
+    <h2>Important Phone Numbers</h2>
+    <div class="phone-list" id="phoneBody"></div>
+    <div class="sac-qr" id="churchCalendarQrBlock"></div>
+  </section>
+
+  <section class="missionaries panel">
+    <h2>Write Our Missionaries</h2>
+    <div class="miss-list" id="missionariesBody"></div>
+    <div class="sac-qr" id="sacQrBlock"></div>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================================
+   HOW TO UPDATE THIS BOARD EACH WEEK
+   Edit only the values inside the DATA object below — nothing else needs
+   to change. Save the file and reload it on the TV (or on whatever is
+   playing it, e.g. a browser in kiosk mode, a signage player, etc).
+   ========================================================================= */
+
+const DATA = {
+
+  wardName: "Olathe 3rd Ward",
+  wardSubtitle: "Sacrament Meeting Program",
+
+  // QR code shown at the bottom of the Sacrament Meeting panel, so people can
+  // pull up this week's announcements later without standing at the TV.
+  // Point it at either: (a) this board's own hosted web address, so people see
+  // everything live on their phone, or (b) a Google Doc with the announcements
+  // pasted in. Set enabled to false to hide this block entirely.
+  announcementsQr: {
+    enabled: true,
+    url: "https://example.com/replace-with-your-link",
+    label: "Scan to view this week's announcements on your phone"
+  },
+
+  // ---- 1) Sacrament Meeting ------------------------------------------
+  // Leave a value as "" to show a blank line (useful before it's been filled in).
+  sacrament: [
+    { label: "Conducting",                    value: "Bishop Sirois" },
+    { label: "Presiding",                     value: "Bishop Sirois" },
+    { label: "Music Leader",                  value: "Marianne Cheney" },
+    { label: "Organist",                      value: "Shelley Broyles" },
+    { label: "Opening Hymn",                  value: "### - _____" },
+    { label: "Invocation",                    value: "" },
+    { label: "Stake Business",                value: "" },
+    { label: "Sacrament Hymn",                value: "### - _____" },
+    { label: "Administration of the Sacrament", value: "" },
+    { label: "Speaker / Youth Speaker",       value: "" },
+    { label: "Speaker",                       value: "" },
+    { label: "Intermediate Hymn",             value: "### - _____" },
+    { label: "Speaker",                       value: "" },
+    { label: "Closing Hymn",                  value: "### - _____" },
+    { label: "Benediction",                   value: "" }
+  ],
+
+  // ---- 2) Announcements -----------------------------------------------
+  // Add/remove items freely in each list — title is bold, detail is the smaller line under it.
+  announcements: {
+    urgent: [
+    ],
+    upcoming: [
+      { title: "Sep 19 – Olathe Stake Women's Conference", detail: "9:00 AM–1:00 PM • Overflow parking available 3:30–9:30 PM" },
+      { title: "Sep 26 – Baptism, Primary Practice & Youth Music Festival", detail: "Primary program practice 2:00–3:00 PM • Cole Turman baptism 3:30–4:30 PM • Multi-Stake Youth Music Festival 6:00–8:30 PM" },
+      { title: "Sep 27 – O3W Primary Program", detail: "10:30–11:30 AM, during Sacrament Meeting" },
+      { title: "Oct 3–4 – General Conference", detail: "Sessions Saturday & Sunday at 11:00 AM and 3:00 PM" },
+      { title: "Oct 10 – Adam Cheney Baptism", detail: "10:00–11:00 AM" }
+    ],
+    future: [
+      { title: "Oct 24 – Multi-Stake Barn Dance", detail: "7:30–10:00 PM" },
+      { title: "Oct 30 – Olathe 3rd Trunk or Treat", detail: "6:00–7:30 PM" },
+      { title: "Nov 1 – Worldwide Devotional for Young Adults", detail: "7:00–8:00 PM (rebroadcast Nov 8, 1:00–2:00 AM)" },
+      { title: "Nov 7 – Service Project", detail: "Details to follow" },
+      { title: "Nov 8 – OL3 Griffith Baptism", detail: "6:00–7:00 PM" },
+      { title: "Nov 13–14 – Olathe Stake Conference", detail: "Setup Friday, conference Saturday" }
+    ],
+    recurring: [
+      { title: "Youth Activity", detail: "Tuesday at 6:50pm; YM:    YW:    " },
+      { title: "Adult Religion Class", detail: "Thursdays: The Thursday morning class will begin at 10:00am, evening class meets at 7:00pm. The class will be taught by Kreig and Sherry Smith. The class will be delivered through Zoom. If you are interested in attending, please send an email to: sssmithARC@aol.com" },
+      { title: "Sacrament Meeting Broadcast Link", detail: "Zoom link Sundays at 10:30 AM", link: "https://zoom.us/j/94976206793" },
+      { title: "Stake Youth Leadership Committee Meeting", detail: "Select Sundays, 5:00–6:00 PM — check the ward calendar for exact dates" }
+    ]
+  },
+
+  // ---- 3) Feed the Missionaries -----------------------------------------
+  // Put the real sign-up link here — the QR code is generated from it automatically.
+  feedMissionaries: {
+    signupUrl: "https://olathe3rd.missionarydinnercalendar.com/",
+    // Paste a public embed link for your sign-up calendar here (Google Calendar's
+    // "Embed code" gives a URL you can drop straight in). Leave blank to show a placeholder.
+    calendarEmbedUrl: "https://olathe3rd.missionarydinnercalendar.com/"
+  },
+
+  // QR code linking to the full Church calendar (Church calendar pages can't be
+  // embedded directly, so this links out to it instead).
+  churchCalendar: {
+    enabled: true,
+    url: "https://www.churchofjesuschrist.org/calendar/month?lang=eng&date=1789331125643",
+    label: "Scan for the full ward calendar"
+  },
+
+  // ---- 4) Important phone numbers ---------------------------------------
+  phoneNumbers: [
+    { role: "Bishop", name: "Justin Sirois", numbers: [{ number: "913-440-4135" }] },
+    { role: "EQ President", name: "Swede Young", numbers: [{ number: "913-325-9275" }] },
+    { role: "RS President", name: "Elena Gudjenov", numbers: [{ number: "913-605-2533" }] },
+    { role: "Ward Mission Leader", name: "David Jarman", numbers: [{ number: "913-424-5806" }] }
+  ],
+
+  // ---- 5) Write our missionaries serving from our Ward -------------------
+  missionaries: [
+    {
+      name: "Elder Ethan Lake",
+      lines: [
+        "California Roseville Mission",
+        "5930 Granite Lake Drive Ste. 110",
+        "Granite Bay, CA 95746"
+      ]
+    },
+    {
+      name: "Elder Nathan Cheney",
+      lines: [
+        "Utah Spanish Fork Mission",
+        "1158 East 1240 South #101",
+        "Spanish Fork, UT 84660"
+      ]
+    },
+    {
+      name: "Elder Matthew Terry",
+      lines: [
+        "Rua Doutor Pedro Melo Cahú, 104",
+        "Boa Viagem",
+        "51020-080 Recife - PE",
+        "BRASIL"
+      ]
+    }
+  ]
+};
+
+/* ========================= Rendering — no need to edit below ========================= */
+
+document.getElementById('wardName').innerHTML =
+  DATA.wardName + '<span>' + DATA.wardSubtitle + '</span>';
+
+// Sacrament Meeting
+const sacBody = document.getElementById('sacramentBody');
+DATA.sacrament.forEach(row => {
+  const div = document.createElement('div');
+  div.className = 'toc-row';
+  div.innerHTML =
+    '<span class="label">' + row.label + '</span>' +
+    '<span class="leader"></span>' +
+    '<span class="value">' + (row.value || '—') + '</span>';
+  sacBody.appendChild(div);
+});
+
+// QR code for viewing announcements away from the TV
+const sacQrBlock = document.getElementById('sacQrBlock');
+if (DATA.announcementsQr && DATA.announcementsQr.enabled) {
+  const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&data=' +
+    encodeURIComponent(DATA.announcementsQr.url);
+  sacQrBlock.innerHTML =
+    '<img src="' + qrSrc + '" alt="QR code to view announcements"><span>' +
+    DATA.announcementsQr.label + '</span>';
+}
+
+// Announcements
+const annCategories = [
+  { key: 'urgent',    title: 'Urgent',              cls: 'urgent' },
+  { key: 'upcoming',  title: 'Upcoming (0–4 weeks)', cls: 'upcoming' },
+  { key: 'future',    title: 'Future',               cls: 'future' },
+  { key: 'recurring', title: 'Recurring',            cls: 'recurring' }
+];
+const annBody = document.getElementById('announcementsBody');
+annCategories.forEach(cat => {
+  const card = document.createElement('div');
+  card.className = 'ann-card ' + cat.cls;
+  const items = (DATA.announcements[cat.key] || []).map(item => {
+    let linkHtml = '';
+    if (item.link) {
+      const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=0&data=' + encodeURIComponent(item.link);
+      linkHtml = '<div class="link-row"><img src="' + qrSrc + '" alt="QR code"><a href="' + item.link + '" target="_blank" rel="noopener">' + item.link + '</a></div>';
+    }
+    return '<div class="ann-item"><div class="t">' + item.title + '</div>' +
+      (item.detail ? '<div class="d">' + item.detail + '</div>' : '') +
+      linkHtml + '</div>';
+  }).join('');
+  card.innerHTML =
+    '<h3>' + cat.title + '</h3>' +
+    '<div class="ann-list">' + (items || '<div class="d">Nothing posted</div>') + '</div>';
+  annBody.appendChild(card);
+});
+
+// Feed the Missionaries
+document.getElementById('qrImage').src =
+  'https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=0&data=' +
+  encodeURIComponent(DATA.feedMissionaries.signupUrl);
+
+const calWrap = document.getElementById('calendarWrap');
+if (DATA.feedMissionaries.calendarEmbedUrl) {
+  calWrap.innerHTML = '<iframe src="' + DATA.feedMissionaries.calendarEmbedUrl + '"></iframe>';
+} else {
+  calWrap.innerHTML =
+    '<div class="calendar-placeholder">Add your sign-up calendar\'s embed link to<br>' +
+    '<strong>calendarEmbedUrl</strong> in the DATA object to show it here.</div>';
+}
+
+// Phone numbers
+const phoneBody = document.getElementById('phoneBody');
+DATA.phoneNumbers.forEach(entry => {
+  const div = document.createElement('div');
+  div.className = 'phone-entry';
+  const numbersHtml = entry.numbers.map(n =>
+    n.tag ? '<span class="tag">' + n.tag + ' </span>' + n.number : n.number
+  ).join(' &nbsp;·&nbsp; ');
+  div.innerHTML =
+    '<div class="role">' + entry.role + '</div>' +
+    (entry.name ? '<div class="name">' + entry.name + '</div>' : '') +
+    '<div class="numbers">' + numbersHtml + '</div>';
+  phoneBody.appendChild(div);
+});
+
+// QR code for the full Church calendar
+const churchCalQrBlock = document.getElementById('churchCalendarQrBlock');
+if (DATA.churchCalendar && DATA.churchCalendar.enabled) {
+  const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&data=' +
+    encodeURIComponent(DATA.churchCalendar.url);
+  churchCalQrBlock.innerHTML =
+    '<img src="' + qrSrc + '" alt="QR code to the ward calendar"><span>' +
+    DATA.churchCalendar.label + '</span>';
+}
+
+// Missionaries serving
+const missBody = document.getElementById('missionariesBody');
+DATA.missionaries.forEach(m => {
+  const div = document.createElement('div');
+  div.className = 'miss-card';
+  div.innerHTML =
+    '<div class="name">' + m.name + '</div>' +
+    m.lines.map(l => '<div class="line">' + l + '</div>').join('');
+  missBody.appendChild(div);
+});
+
+// Live clock
+function tick(){
+  const now = new Date();
+  document.getElementById('clockTime').textContent =
+    now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('clockDate').textContent =
+    now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+}
+tick();
+setInterval(tick, 1000 * 30);
+</script>
+
+</body>
+</html>
